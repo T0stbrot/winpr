@@ -3,7 +3,7 @@ Go Program that runs as a Probe Service for my Services
 
 # Building it yourself
 1. Install Go: https://go.dev/dl/
-2. Download Source and unzip it
+2. Download Source of latest release and unzip it
 3. Open a CMD Window inside the folder
 4. Run `go build .`
 5. Copy the `winpr.exe` file to C:\Windows\System32\
