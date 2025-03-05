@@ -12,10 +12,23 @@ import (
 )
 
 type Message struct {
-	Type    string `json:"type"`
-	Action  string `json:"action,omitempty"`
-	Target  string `json:"target,omitempty"`
-	Content string `json:"content,omitempty"`
+	Type    string  `json:"type"`
+	Action  string  `json:"action,omitempty"`
+	Target  string  `json:"target,omitempty"`
+	Content any     `json:"content,omitempty"`
+	Options Options `json:"options,omitempty"`
+}
+
+type Options struct {
+	Target  string `json:"target"`
+	Proto   string `json:"proto,omitempty"`
+	Timeout int    `json:"timeout,omitempty"`
+	Maxhops int    `json:"maxhops,omitempty"`
+	TTL     int    `json:"ttl,omitempty"`
+}
+
+type Register struct {
+	Version string `json:"version"`
 }
 
 type myService struct{}
@@ -76,15 +89,31 @@ func main() {
 	}
 }
 
-func traceroute(conn *websocket.Conn, target string) {
-	res := tracert.Traceroute4(target, 30, 1000)
+// functions
+
+func traceroute6(conn *websocket.Conn, target string, maxhops int, timeout int) {
+	res := tracert.Traceroute6(target, maxhops, timeout)
 	jsonOutput, _ := json.Marshal(res)
 	returnMsg := Message{Type: "result", Action: "traceroute", Target: target, Content: string(jsonOutput)}
 	conn.WriteJSON(returnMsg)
 }
 
-func icmp(conn *websocket.Conn, target string) {
-	res := ping.Ping4(target, 64, 5000)
+func icmp6(conn *websocket.Conn, target string, ttl int, timeout int) {
+	res := ping.Ping6(target, ttl, timeout)
+	jsonOutput, _ := json.Marshal(res)
+	returnMsg := Message{Type: "result", Action: "icmp", Target: target, Content: string(jsonOutput)}
+	conn.WriteJSON(returnMsg)
+}
+
+func traceroute4(conn *websocket.Conn, target string, maxhops int, timeout int) {
+	res := tracert.Traceroute4(target, maxhops, timeout)
+	jsonOutput, _ := json.Marshal(res)
+	returnMsg := Message{Type: "result", Action: "traceroute", Target: target, Content: string(jsonOutput)}
+	conn.WriteJSON(returnMsg)
+}
+
+func icmp4(conn *websocket.Conn, target string, ttl int, timeout int) {
+	res := ping.Ping4(target, ttl, timeout)
 	jsonOutput, _ := json.Marshal(res)
 	returnMsg := Message{Type: "result", Action: "icmp", Target: target, Content: string(jsonOutput)}
 	conn.WriteJSON(returnMsg)
@@ -105,7 +134,7 @@ func runPrClient() error {
 		defer conn.Close()
 
 		// Registering at the central service
-		registerMsg := Message{Type: "register"}
+		registerMsg := Message{Type: "register", Content: Register{Version: "v0.0.2"}}
 		conn.WriteJSON(registerMsg)
 
 		fmt.Printf("\nconnected to master")
@@ -140,10 +169,40 @@ func runPrClient() error {
 			if msg.Target != "" && msg.Action != "" && msg.Type == "request" {
 				if msg.Action == "icmp" {
 					fmt.Printf("\nrequested %v for %v", msg.Action, msg.Target)
-					icmp(conn, msg.Target)
+					ttl := 64
+					timeout := 1000
+					if msg.Options.Target != "" {
+						ttl = msg.Options.TTL
+						timeout = msg.Options.Timeout
+					}
+					icmp4(conn, msg.Target, ttl, timeout)
 				} else if msg.Action == "traceroute" {
 					fmt.Printf("\nrequested %v for %v", msg.Action, msg.Target)
-					traceroute(conn, msg.Target)
+					maxhops := 30
+					timeout := 1000
+					if msg.Options.Target != "" {
+						maxhops = msg.Options.Maxhops
+						timeout = msg.Options.Timeout
+					}
+					traceroute4(conn, msg.Target, maxhops, timeout)
+				} else if msg.Action == "icmp6" {
+					fmt.Printf("\nrequested %v for %v", msg.Action, msg.Target)
+					ttl := 64
+					timeout := 1000
+					if msg.Options.Target != "" {
+						ttl = msg.Options.TTL
+						timeout = msg.Options.Timeout
+					}
+					icmp6(conn, msg.Target, ttl, timeout)
+				} else if msg.Action == "traceroute6" {
+					fmt.Printf("\nrequested %v for %v", msg.Action, msg.Target)
+					maxhops := 30
+					timeout := 1000
+					if msg.Options.Target != "" {
+						maxhops = msg.Options.Maxhops
+						timeout = msg.Options.Timeout
+					}
+					traceroute6(conn, msg.Target, maxhops, timeout)
 				}
 				continue
 			}
