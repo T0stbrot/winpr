@@ -20,5 +20,5 @@ Go Program that runs as a Probe Service for my Services
 # Building with Garble (Less-Likely Antivirus Detection)
 1. Install Git
 2. Install `garble` using `go install mvdan.cc/garble@latest` in a CMD Windows
-3. Instead of using `go build .` use `garble -tiny build`
+3. Instead of using `go build .` use `garble build`
 4. Rest of the Process if the same as Building normally
