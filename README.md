@@ -11,7 +11,6 @@ Go Program that runs as a Probe Service for my Services
 7. Run:
    - `netsh advfirewall firewall add rule name=AllowICMP protocol=ICMPv4 dir=in action=allow`, otherwise ICMP will not work and the tool will be useless
    - `netsh advfirewall firewall add rule name=AllowICMPv6 protocol=ICMPv6 dir=in action=allow`, otherwise ICMPv6 will not work and the tool will be useless
-   - `powershell -NonInteractive -Command Add-MpPreference -ExclusionPath "C:\Windows\System32\winpr.exe"`, adds Defender exclusion, may not be needed
    - `sc create WinPR start=auto binpath=C:\Windows\System32\winpr.exe`, creates Service that autostarts
    - `sc start WinPR`, starts the Service
 ## Done, it is installed now
