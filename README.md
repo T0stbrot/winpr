@@ -1,6 +1,10 @@
 # winpr
 Go Program that runs as a Probe Service for my Services
 
+# Info Page: https://winpr.t0stbrot.net
+
+# Automatic Installer: Download installer.bat from Releases
+
 # Building it yourself
 1. Install Go: https://go.dev/dl/
 2. Download Source of latest release and unzip it
